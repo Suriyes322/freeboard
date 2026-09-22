@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IoT Environment Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">⌁</div>
+        <div><strong>ENV<span>SYNC</span></strong><small>IoT MONITORING</small></div>
+      </div>
+      <nav>
+        <a class="active" href="#overview">▦ <span>Overview</span></a>
+        <a href="#analytics">◴ <span>Analytics</span></a>
+        <a href="#alerts">⚠ <span>Alerts</span></a>
+      </nav>
+      <div class="side-note">
+        <div class="pulse"></div>
+        <b>ESP32-01</b>
+        <small>Environment Node</small>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">SMART ENVIRONMENT / LIVE MONITORING</div>
+          <h1>Environment Overview</h1>
+          <p class="muted">ติดตามสภาพแวดล้อมจาก ESP32 แบบเรียลไทม์</p>
+        </div>
+        <div class="header-actions">
+          <div id="connectionBadge" class="status-badge offline"><i></i> Offline</div>
+          <button id="refreshBtn" class="icon-btn" title="Refresh">↻</button>
+        </div>
+      </header>
+
+      <section id="overview" class="hero-grid">
+        <div class="hero-card">
+          <div class="card-top"><span>DEVICE STATUS</span><span class="tiny-dot"></span></div>
+          <div class="device-row">
+            <div class="device-icon">⌁</div>
+            <div><h2>ESP32-01</h2><p class="muted">Lab Environment Sensor</p></div>
+          </div>
+          <div class="device-meta">
+            <div><span>Last update</span><b id="lastUpdate">Waiting...</b></div>
+            <div><span>Update interval</span><b>10 seconds</b></div>
+          </div>
+        </div>
+        <div class="hero-card insight-card">
+          <div class="card-top"><span>SMART INSIGHT</span><span>✦</span></div>
+          <h2 id="insightTitle">กำลังรอข้อมูล...</h2>
+          <p id="insightText" class="muted">ระบบจะแสดงคำแนะนำเมื่อได้รับข้อมูลจาก Firebase</p>
+          <div class="insight-line"></div>
+        </div>
+      </section>
+
+      <section class="metric-grid">
+        <article class="metric-card orange">
+          <div class="metric-head"><span>Temperature</span><span class="metric-symbol">°C</span></div>
+          <div class="metric-value"><span id="tempValue">--</span><small>°C</small></div>
+          <div class="metric-foot"><span id="tempState">Waiting for data</span><span>🌡</span></div>
+        </article>
+        <article class="metric-card blue">
+          <div class="metric-head"><span>Humidity</span><span class="metric-symbol">%</span></div>
+          <div class="metric-value"><span id="humiValue">--</span><small>%</small></div>
+          <div class="metric-foot"><span id="humiState">Waiting for data</span><span>◌</span></div>
+        </article>
+        <article class="metric-card yellow">
+          <div class="metric-head"><span>Light Intensity</span><span class="metric-symbol">lx</span></div>
+          <div class="metric-value"><span id="lightValue">--</span><small>lx</small></div>
+          <div class="metric-foot"><span id="lightState">Waiting for data</span><span>☼</span></div>
+        </article>
+      </section>
+
+      <section id="analytics" class="panel chart-panel">
+        <div class="panel-heading">
+          <div><h2>Sensor History</h2><p class="muted">ข้อมูลย้อนหลังจาก Firebase Realtime Database</p></div>
+          <select id="rangeSelect"><option value="30">ล่าสุด 30 รายการ</option><option value="60">ล่าสุด 60 รายการ</option><option value="120">ล่าสุด 120 รายการ</option></select>
+        </div>
+        <div class="legend"><span><i class="legend-temp"></i> Temperature</span><span><i class="legend-humi"></i> Humidity</span><span><i class="legend-light"></i> Light / 20</span></div>
+        <div class="chart-wrap"><canvas id="historyChart"></canvas><div id="chartEmpty" class="chart-empty">ยังไม่มีข้อมูลประวัติ</div></div>
+      </section>
+
+      <section class="lower-grid">
+        <div class="panel">
+          <div class="panel-heading"><div><h2>Statistics</h2><p class="muted">สรุปค่าจากข้อมูลประวัติที่โหลดมา</p></div></div>
+          <div class="stats-table">
+            <div class="stat-row header"><span>Metric</span><span>Average</span><span>Min</span><span>Max</span></div>
+            <div class="stat-row"><span>🌡 Temperature</span><b id="tempAvg">--</b><span id="tempMin">--</span><span id="tempMax">--</span></div>
+            <div class="stat-row"><span>◌ Humidity</span><b id="humiAvg">--</b><span id="humiMin">--</span><span id="humiMax">--</span></div>
+            <div class="stat-row"><span>☼ Light</span><b id="lightAvg">--</b><span id="lightMin">--</span><span id="lightMax">--</span></div>
+          </div>
+        </div>
+
+        <div id="alerts" class="panel">
+          <div class="panel-heading"><div><h2>Smart Alerts</h2><p class="muted">ตรวจสอบค่าที่เกินเกณฑ์</p></div><span class="alert-count" id="alertCount">0</span></div>
+          <div class="thresholds">
+            <label>Temperature alert (°C)<input id="tempThreshold" type="number" value="35" min="0" max="100"></label>
+            <label>Humidity alert (%)<input id="humiThreshold" type="number" value="80" min="0" max="100"></label>
+          </div>
+          <div id="alertList" class="alert-list"><div class="empty-alert">✓ ยังไม่มีการแจ้งเตือน</div></div>
+        </div>
+      </section>
+
+      <footer>ENV<span>SYNC</span> · IoT Environment Dashboard · Firebase Realtime Database</footer>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
